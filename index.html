@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FittingBox VTO Demo</title>
+    <style>
+      #vtoContainer {
+        width: 640px;
+        height: 480px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+      }
+      #controls {
+        margin-top: 15px;
+      }
+      button {
+        margin-right: 8px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      #snapshotResult {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <div id="root"></div> -->
+    <h2>👓 FittingBox Virtual Try-On Demo</h2>
+
+    <!-- Container where VTO will be mounted -->
+    <div id="vtoContainer"></div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <button id="startLive">Start Live</button>
+      <button id="stopLive">Stop</button>
+      <button id="snapshot">Take Snapshot</button>
+      <button id="frame1">Frame 1</button>
+      <button id="frame2">Frame 2</button>
+      <button id="frame3">Frame 3</button>
+    </div>
+
+    <!-- Snapshot preview -->
+    <div id="snapshotResult"></div>
+
+    <!-- Load the FittingBox VTO script -->
+    <script src="https://vto-advanced-sdk.fittingbox.com/vto-advanced.js"></script>
+
+    <script>
+      let vto;
+
+      async function initVTO() {
+        const container = document.getElementById("vtoContainer");
+
+        // Initialize the VTO instance
+        vto = new FittingBoxVTO({
+          apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
+          frame: "8053672909258",
+          width: container.clientWidth,
+          height: container.clientHeight,
+          lang: "en",
+          uiConfiguration: {
+            livePhotoButton: true,
+            cameraPermissionScreen: true,
+            photoWelcomeScreen: false,
+            vtoLoadingScreen: true,
+          },
+        });
+
+        // Callbacks
+        vto.onIssue = (data) => {
+          console.warn("⚠️ Issue:", data);
+        };
+
+        vto.onSnapshot = (result) => {
+          console.log("📸 Snapshot result:", result);
+          const img = document.createElement("img");
+          img.src = result.dataUrl;
+          img.width = 300;
+          document.getElementById("snapshotResult").innerHTML = "";
+          document.getElementById("snapshotResult").appendChild(img);
+        };
+
+        vto.onPhotoRender = (res) => {
+          console.log("🎨 Photo render:", res);
+        };
+
+        vto.onLiveStatus = (status) => {
+          console.log("📡 Live status:", status);
+        };
+
+        vto.onMode = (mode) => {
+          console.log("🔄 Mode changed to:", mode);
+        };
+      }
+
+      // Initialize
+      initVTO();
+
+      // Controls
+      document.getElementById("startLive").onclick = () => vto.startVto("live");
+      document.getElementById("stopLive").onclick = () => vto.stopVto();
+      document.getElementById("snapshot").onclick = () => vto.getSnapshot();
+
+      // Frame switch buttons
+      document.getElementById("frame1").onclick = () =>
+        vto.setFrame("8053672909258");
+      document.getElementById("frame2").onclick = () =>
+        vto.setFrame("0888392486523");
+      document.getElementById("frame3").onclick = () =>
+        vto.setFrame("8056597233958");
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
