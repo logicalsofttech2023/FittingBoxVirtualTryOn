@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 function App() {
   const fitmixRef = useRef(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const params = {
@@ -11,6 +12,9 @@ function App() {
       onStopVto: hide,
       onIssue: (data) => {
         console.log("Issue:", data);
+      },
+      onSnapshot: (snapshot) => {
+        console.log("Snapshot taken:", snapshot);
       },
     };
 
@@ -23,7 +27,6 @@ function App() {
     );
 
     return () => {
-      // cleanup when component unmount
       if (window.fitmixInstance) {
         window.fitmixInstance.stopVto();
       }
@@ -42,18 +45,34 @@ function App() {
     }
   };
 
-  const openVto = () => {
-    window.fitmixInstance.startVto("live");
+  const openVto = (mode = "live") => {
+    window.fitmixInstance.startVto(mode);
     show();
+    setShowPopup(true);
   };
 
   const stopVto = () => {
     window.fitmixInstance.stopVto();
     hide();
+    setShowPopup(false);
+  };
+
+  const switchCamera = () => {
+    window.fitmixInstance.switchCamera();
+  };
+
+  const takeSnapshot = () => {
+    window.fitmixInstance.takeSnapshot();
+  };
+
+  const getPD = async () => {
+    const pd = await window.fitmixInstance.getPD();
+    alert("Your PD: " + JSON.stringify(pd));
   };
 
   return (
     <div className="wrapper">
+      {/* Frame Selection */}
       <div>
         <button onClick={() => window.fitmixInstance.setFrame("8053672909258")}>
           Sample frame 1
@@ -66,14 +85,29 @@ function App() {
         </button>
       </div>
 
-      <button onClick={openVto}>Start VTO</button>
-      <button onClick={stopVto}>Stop VTO</button>
+      {/* Open Popup */}
+      <button onClick={() => openVto("live")}>Start Live VTO</button>
+      <button onClick={() => openVto("photo")}>Start Photo VTO</button>
 
-      <div
-        id="fitmix-container"
-        ref={fitmixRef}
-        style={{ width: "min(500px,90vw)", height: "400px", display: "none" }}
-      ></div>
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <div
+              id="fitmix-container"
+              ref={fitmixRef}
+              style={{ width: "500px", height: "400px" }}
+            ></div>
+
+            <div className="popup-controls">
+              <button onClick={switchCamera}>Switch Camera</button>
+              <button onClick={takeSnapshot}>Take Snapshot</button>
+              <button onClick={getPD}>Get PD</button>
+              <button onClick={stopVto}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,13 @@ body {
   margin: 0;
 }
 
+#fitmix-container {
+  width: min(500px, 90vw);
+  flex: 1;
+  display: none;
+}
+
+
 .wrapper {
   --padding: 0.5rem;
   height: calc(100vh - var(--padding) * 2);
@@ -12,8 +19,28 @@ body {
   padding: var(--padding);
 }
 
-#fitmix-container {
-  width: min(500px, 90vw);
-  flex: 1;
-  display: none;
+/* Popup modal */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.popup-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.popup-controls {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
