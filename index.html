@@ -5,26 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FittingBox VTO Advanced Demo</title>
     <style>
-      #my-fitmix-container {
-        width: 660px;
-        height: 560px;
-        margin: auto;
-        border: 1px solid #ccc;
+      html,
+      body {
+        margin: 0;
       }
-      .status {
-        text-align: center;
-        margin: 10px;
-        font-weight: bold;
+
+      .wrapper {
+        --padding: 0.5rem;
+        height: calc(100vh - var(--padding) * 2);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: var(--padding);
       }
-      .btns {
-        text-align: center;
-        margin-top: 20px;
-      }
-      .btns button {
-        margin: 0 5px;
-        padding: 8px 16px;
-        font-size: 14px;
-        cursor: pointer;
+
+      #fitmix-container {
+        width: min(500px, 90vw);
+        flex: 1;
+        display: none;
       }
     </style>
     <!-- Load FittingBox FitMix SDK -->
@@ -34,82 +32,66 @@
     ></script>
   </head>
   <body>
-    <div class="status" id="statusMessage">Loading VTO...</div>
-    <div id="my-fitmix-container"></div>
+    <div class="wrapper">
+      <div>
+        <button onclick="fitmixInstance.setFrame('8053672909258')">
+          Sample frame 1
+        </button>
+        <button onclick="fitmixInstance.setFrame('0888392486523')">
+          Sample frame 2
+        </button>
+        <button onclick="fitmixInstance.setFrame('8056597233958')">
+          Sample frame 3
+        </button>
+      </div>
 
-    <div class="btns">
-      <button id="btnFrame1">Frame 1</button>
-      <button id="btnFrame2">Frame 2</button>
-      <button id="btnFrame3">Frame 3</button>
-      <button id="btnSnapshot">Take Snapshot</button>
+      <button onclick="openVto()">
+        User action to start the VTO experience
+      </button>
+      <button onclick="stopVto()">
+        User action to stop the VTO experience
+      </button>
+
+      <div id="fitmix-container"></div>
     </div>
-
-    <div id="snapshotResult" style="text-align: center; margin-top: 20px;"></div>
-
     <script>
-      let fitmixInstance;
-      const statusMessage = document.getElementById("statusMessage");
-
-      function updateStatus(msg) {
-        statusMessage.textContent = msg;
-      }
+      var params = {
+        apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
+        frame: "8053672909258",
+        onStopVto: hide,
+        onIssue: (data) => {
+          console.log(data);
+        },
+      };
 
       window.onload = function () {
-        const params = {
-          apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn", // ✅ आपकी demo key
-          lang: "en",
-          onSnapshot: function (data) {
-            const img = document.createElement("img");
-            img.src = data.dataUrl;
-            img.width = 300;
-            document.getElementById("snapshotResult").innerHTML = "";
-            document.getElementById("snapshotResult").appendChild(img);
-            updateStatus("Snapshot done");
-          },
-        };
-
-        // Widget create करो
-        fitmixInstance = FitMix.createWidget(
-          "my-fitmix-container",
+        window.fitmixInstance = FitMix.createWidget(
+          "fitmix-container",
           params,
           function () {
-            updateStatus("VTO ready ✅");
-
-            // By default पहला frame load कर दो
-            fitmixInstance.setFrame("8053672909258");
+            console.log("VTO module is ready.");
           }
         );
-
-        // Frame switch buttons
-        document
-          .getElementById("btnFrame1")
-          .addEventListener("click", () => {
-            fitmixInstance.setFrame("8053672909258");
-            updateStatus("Frame 1 loaded");
-          });
-
-        document
-          .getElementById("btnFrame2")
-          .addEventListener("click", () => {
-            fitmixInstance.setFrame("0888392486523");
-            updateStatus("Frame 2 loaded");
-          });
-
-        document
-          .getElementById("btnFrame3")
-          .addEventListener("click", () => {
-            fitmixInstance.setFrame("8056597233958");
-            updateStatus("Frame 3 loaded");
-          });
-
-        // Snapshot button
-        document
-          .getElementById("btnSnapshot")
-          .addEventListener("click", () => {
-            fitmixInstance.getSnapshot();
-            updateStatus("Taking snapshot...");
-          });
       };
+
+      const fitmix = document.getElementById("fitmix-container");
+
+      function hide() {
+        fitmix.style.display = "none";
+      }
+
+      function show() {
+        fitmix.style.display = "block";
+      }
+
+      function openVto() {
+        fitmixInstance.startVto("live");
+        show();
+      }
+
+      function stopVto() {
+        fitmixInstance.stopVto();
+      }
     </script>
   </body>
 </html>
