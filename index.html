@@ -64,42 +64,6 @@
         overflow: hidden;
       }
       
-      .camera-feed {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: none;
-        transform: scaleX(-1); /* Mirror the camera feed */
-      }
-      
-      .glasses-overlay {
-        position: absolute;
-        width: 200px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.3);
-        border: 3px solid #4b6cb7;
-        border-radius: 10px;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        color: #4b6cb7;
-        z-index: 10;
-        box-shadow: 0 0 20px rgba(75, 108, 183, 0.5);
-        transition: all 0.3s ease;
-      }
-      
-      .face-outline {
-        position: absolute;
-        width: 220px;
-        height: 280px;
-        border: 2px solid #4b6cb7;
-        border-radius: 50%;
-        display: none;
-        z-index: 5;
-        opacity: 0.5;
-      }
-      
       .status {
         text-align: center;
         margin: 10px 0;
@@ -121,11 +85,6 @@
       .status.success {
         background: #e8f5e9;
         color: #2e7d32;
-      }
-      
-      .status.warning {
-        background: #fff8e1;
-        color: #ff8f00;
       }
       
       .controls {
@@ -196,7 +155,6 @@
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         max-width: 300px;
-        transform: scaleX(-1); /* Mirror the snapshot */
       }
       
       .instructions {
@@ -227,30 +185,6 @@
         font-size: 14px;
       }
       
-      .frame-option {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0 10px;
-      }
-      
-      .frame-img {
-        width: 100px;
-        height: 50px;
-        object-fit: contain;
-        margin-bottom: 5px;
-        border: 2px solid transparent;
-        border-radius: 5px;
-        padding: 5px;
-        transition: all 0.3s ease;
-      }
-      
-      .frame-img.selected {
-        border-color: #4b6cb7;
-        background-color: #e3f2fd;
-        transform: scale(1.1);
-      }
-      
       @media (max-width: 768px) {
         #vtoContainer {
           width: 100%;
@@ -270,16 +204,6 @@
         .frames-container {
           flex-direction: column;
         }
-        
-        .glasses-overlay {
-          width: 150px;
-          height: 60px;
-        }
-        
-        .face-outline {
-          width: 180px;
-          height: 220px;
-        }
       }
     </style>
   </head>
@@ -293,11 +217,8 @@
       <div class="content">
         <div id="vtoContainer">
           <div class="status loading" id="statusMessage">
-            Initializing VTO simulation...
+            Loading VTO, please wait...
           </div>
-          <video id="cameraFeed" class="camera-feed" autoplay playsinline></video>
-          <div class="face-outline" id="faceOutline"></div>
-          <div id="glassesOverlay" class="glasses-overlay">Frame 1</div>
         </div>
         
         <div class="instructions">
@@ -309,352 +230,243 @@
             <li>Click "Take Snapshot" to capture your look</li>
             <li>Click "Stop" when you're finished</li>
           </ol>
-          <div class="status warning" id="warningMessage">
-            Note: This is a simulation. The actual FittingBox SDK is currently unavailable.
-          </div>
         </div>
         
         <div class="controls">
-          <button id="startLive" class="primary-btn">
+          <button id="startLive" class="primary-btn" disabled>
             <span>▶️</span> Start Live
           </button>
           <button id="stopLive" class="secondary-btn" disabled>
             <span>⏹️</span> Stop
           </button>
-          <button id="snapshot" class="action-btn">
+          <button id="snapshot" class="action-btn" disabled>
             <span>📸</span> Take Snapshot
           </button>
         </div>
         
         <div class="frames-container">
-          <div class="frame-option">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIGZpbGw9IiM0YjZjYjciIG9wYWNpdHk9IjAuMiIgcng9IjEwIi8+PHBhdGggZD0iTTQ1IDQwIEwxMjAgNDAgTDEyMCA1MCBMNDUgNTAgTDQ1IDQwIFoiIGZpbGw9IiM0YjZjYjciLz48cGF0aCBkPSJNMTU1IDQwIEwxNTUgNTAgTDEzNSA1MCBMMTM1IDQwIEwxNTUgNDAgWiIgZmlsbD0iIzRiNmNiNyIvPjwvc3ZnPg==" class="frame-img selected" id="frame1-img">
-            <button id="frame1" class="frame-btn">
-              <span>👓</span> Frame 1
-            </button>
-          </div>
-          <div class="frame-option">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIGZpbGw9IiNmZjg0MWQiIG9wYWNpdHk9IjAuMiIgcng9IjEwIi8+PGNpcmNsZSBjeD0iNjAiIGN5PSI0MCIgcj0iMjAiIGZpbGw9IiNmZjg0MWQiLz48Y2lyY2xlIGN4PSIxNDAiIGN5PSI0MCIgcj0iMjAiIGZpbGw9IiNmZjg0MWQiLz48L3N2Zz4=" class="frame-img" id="frame2-img">
-            <button id="frame2" class="frame-btn">
-              <span>🥽</span> Frame 2
-            </button>
-          </div>
-          <div class="frame-option">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIGZpbGw9IiMzMzMzMzMiIG9wYWNpdHk9IjAuMiIgcng9IjEwIi8+PHJlY3QgeD0iMzAiIHk9IjI1IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjMwIiByeD0iNSIgZmlsbD0iIzMzMzMzMyIvPjwvc3ZnPg==" class="frame-img" id="frame3-img">
-            <button id="frame3" class="frame-btn">
-              <span>🕶️</span> Frame 3
-            </button>
-          </div>
+          <button id="frame1" class="frame-btn" disabled>
+            <span>👓</span> Frame 1
+          </button>
+          <button id="frame2" class="frame-btn" disabled>
+            <span>🥽</span> Frame 2
+          </button>
+          <button id="frame3" class="frame-btn" disabled>
+            <span>🕶️</span> Frame 3
+          </button>
         </div>
         
         <div id="snapshotResult"></div>
       </div>
       
       <footer>
-        <p>Powered by FittingBox VTO Technology (Simulation) | Demo Application</p>
+        <p>Powered by FittingBox VTO Technology | Demo Application</p>
       </footer>
     </div>
 
+    <!-- Load the FittingBox VTO script -->
+    <script src="https://vto-advanced-integration-api.fittingbox.com/index.js"></script>
+
     <script>
-      // VTO Simulation - This would be replaced with the actual FittingBox SDK
-      class VTOSimulation {
-        constructor(options) {
-          this.options = options;
-          this.isActive = false;
-          this.currentFrame = "8053672909258";
-          this.callbacks = {};
-          this.facePosition = { x: 0, y: 0 };
-          this.faceDetectionInterval = null;
-        }
-        
-        on(event, callback) {
-          this.callbacks[event] = callback;
-        }
-        
-        startVto(mode) {
-          this.isActive = true;
-          this.simulateLoading(() => {
-            if (this.callbacks.onOpenStream) {
-              this.callbacks.onOpenStream({ success: true });
-            }
-            
-            if (this.callbacks.onLiveStatus) {
-              this.callbacks.onLiveStatus({
-                faceTracking: true,
-                glassesReady: true,
-                hasStream: true,
-                removalActive: false,
-                userHasGlasses: true
-              });
-            }
-            
-            // Show camera feed and glasses overlay
-            document.getElementById('cameraFeed').style.display = 'block';
-            document.getElementById('glassesOverlay').style.display = 'flex';
-            document.getElementById('faceOutline').style.display = 'block';
-            
-            // Start face detection simulation
-            this.simulateFaceDetection();
-            
-            if (this.callbacks.onMode) {
-              this.callbacks.onMode(mode);
-            }
-          });
-        }
-        
-        stopVto() {
-          this.isActive = false;
-          document.getElementById('cameraFeed').style.display = 'none';
-          document.getElementById('glassesOverlay').style.display = 'none';
-          document.getElementById('faceOutline').style.display = 'none';
+      let vto;
+      let isVtoReady = false;
+      let retryCount = 0;
+      const maxRetries = 10;
+      
+      const statusMessage = document.getElementById('statusMessage');
+      
+      function updateStatus(message, type = 'loading') {
+        statusMessage.textContent = message;
+        statusMessage.className = `status ${type}`;
+      }
+      
+      function initVTO() {
+        // Check if VTOAdvanced is available
+        if (typeof VTOAdvanced === 'undefined') {
+          retryCount++;
           
-          // Stop face detection simulation
-          if (this.faceDetectionInterval) {
-            clearInterval(this.faceDetectionInterval);
-            this.faceDetectionInterval = null;
+          if (retryCount >= maxRetries) {
+            updateStatus('Failed to load VTO. Please refresh the page and try again.', 'error');
+            return;
           }
           
-          if (this.callbacks.onStopVto) {
-            this.callbacks.onStopVto();
-          }
+          updateStatus(`Loading VTO (${retryCount}/${maxRetries})...`);
+          setTimeout(initVTO, 1000);
+          return;
         }
         
-        getSnapshot() {
-          this.simulateLoading(() => {
-            if (this.callbacks.onSnapshot) {
-              // Create a snapshot with the glasses overlay
-              const video = document.getElementById('cameraFeed');
-              const canvas = document.createElement('canvas');
-              canvas.width = video.videoWidth || 640;
-              canvas.height = video.videoHeight || 480;
-              const ctx = canvas.getContext('2d');
-              
-              // Draw video frame
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              
-              // Draw glasses overlay
-              const glasses = document.getElementById('glassesOverlay');
-              const glassesRect = glasses.getBoundingClientRect();
-              const containerRect = document.getElementById('vtoContainer').getBoundingClientRect();
-              
-              const x = (glassesRect.left - containerRect.left) / containerRect.width * canvas.width;
-              const y = (glassesRect.top - containerRect.top) / containerRect.height * canvas.height;
-              const width = glassesRect.width / containerRect.width * canvas.width;
-              const height = glassesRect.height / containerRect.height * canvas.height;
-              
-              ctx.fillStyle = glasses.style.backgroundColor || 'rgba(255, 255, 255, 0.3)';
-              ctx.fillRect(x, y, width, height);
-              
-              ctx.strokeStyle = glasses.style.borderColor || '#4b6cb7';
-              ctx.lineWidth = 3;
-              ctx.strokeRect(x, y, width, height);
-              
-              ctx.fillStyle = glasses.style.color || '#4b6cb7';
-              ctx.font = 'bold 16px Arial';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText(glasses.textContent, x + width/2, y + height/2);
-              
-              // Convert to data URL
-              const dataUrl = canvas.toDataURL('image/png');
-              
-              this.callbacks.onSnapshot({
-                dataUrl: dataUrl,
-                height: canvas.height,
-                width: canvas.width
-              });
-            }
-          });
-        }
+        const container = document.getElementById("vtoContainer");
         
-        setFrame(frameId) {
-          this.currentFrame = frameId;
-          const overlay = document.getElementById('glassesOverlay');
+        try {
+          updateStatus('Initializing VTO...');
           
-          // Update frame display based on ID
-          if (frameId === "8053672909258") {
-            overlay.textContent = "Frame 1";
-            overlay.style.borderColor = "#4b6cb7";
-            overlay.style.color = "#4b6cb7";
-            overlay.style.boxShadow = "0 0 20px rgba(75, 108, 183, 0.5)";
-            this.selectFrame('frame1-img');
-          } else if (frameId === "0888392486523") {
-            overlay.textContent = "Frame 2";
-            overlay.style.borderColor = "#ff841d";
-            overlay.style.color = "#ff841d";
-            overlay.style.boxShadow = "0 0 20px rgba(255, 132, 29, 0.5)";
-            this.selectFrame('frame2-img');
-          } else if (frameId === "8056597233958") {
-            overlay.textContent = "Frame 3";
-            overlay.style.borderColor = "#333333";
-            overlay.style.color = "#333333";
-            overlay.style.boxShadow = "0 0 20px rgba(51, 51, 51, 0.5)";
-            this.selectFrame('frame3-img');
-          }
-          
-          this.simulateLoading(() => {
-            if (this.callbacks.onLiveStatus) {
-              this.callbacks.onLiveStatus({
-                faceTracking: true,
-                glassesReady: true,
-                hasStream: true,
-                removalActive: false,
-                userHasGlasses: true
-              });
-            }
-          });
-        }
-        
-        selectFrame(frameId) {
-          // Remove selected class from all frames
-          document.querySelectorAll('.frame-img').forEach(img => {
-            img.classList.remove('selected');
+          // Initialize the VTO instance
+          vto = new VTOAdvanced({
+            apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
+            frame: "8053672909258",
+            width: container.clientWidth,
+            height: container.clientHeight,
+            lang: "en",
+            uiConfiguration: {
+              livePhotoButton: true,
+              cameraPermissionScreen: true,
+              photoWelcomeScreen: false,
+              vtoLoadingScreen: true,
+              hideEverything: false
+            },
           });
           
-          // Add selected class to the clicked frame
-          document.getElementById(frameId).classList.add('selected');
-        }
-        
-        simulateFaceDetection() {
-          const glasses = document.getElementById('glassesOverlay');
-          const faceOutline = document.getElementById('faceOutline');
-          const container = document.getElementById('vtoContainer');
+          // Set up callbacks
+          setupCallbacks();
           
-          // Random movement for the face/glasses
-          this.faceDetectionInterval = setInterval(() => {
-            if (!this.isActive) return;
-            
-            // Random slight movement
-            const containerRect = container.getBoundingClientRect();
-            const centerX = containerRect.width / 2;
-            const centerY = containerRect.height / 2;
-            
-            // Simulate face movement
-            this.facePosition.x = centerX - 100 + (Math.random() * 40 - 20);
-            this.facePosition.y = centerY - 40 + (Math.random() * 40 - 20);
-            
-            // Update glasses position
-            glasses.style.left = (this.facePosition.x - 100) + 'px';
-            glasses.style.top = (this.facePosition.y - 40) + 'px';
-            
-            // Update face outline position
-            faceOutline.style.left = (this.facePosition.x - 110) + 'px';
-            faceOutline.style.top = (this.facePosition.y - 140) + 'px';
-          }, 100);
-        }
-        
-        simulateLoading(callback) {
-          // Simulate network delay
-          setTimeout(callback, 800);
+        } catch (error) {
+          console.error("Error initializing VTO:", error);
+          updateStatus('Error initializing VTO. Check console for details.', 'error');
         }
       }
-
-      // Initialize the VTO simulation
-      document.addEventListener('DOMContentLoaded', function() {
-        const statusMessage = document.getElementById('statusMessage');
-        const warningMessage = document.getElementById('warningMessage');
-        const startBtn = document.getElementById('startLive');
-        const stopBtn = document.getElementById('stopLive');
-        const snapshotBtn = document.getElementById('snapshot');
-        const frame1Btn = document.getElementById('frame1');
-        const frame2Btn = document.getElementById('frame2');
-        const frame3Btn = document.getElementById('frame3');
-        
-        function updateStatus(message, type = 'loading') {
-          statusMessage.textContent = message;
-          statusMessage.className = `status ${type}`;
-        }
-        
-        updateStatus('VTO simulation ready', 'success');
-        
-        // Initialize VTO simulation
-        const vto = new VTOSimulation({
-          apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
-          frame: "8053672909258",
-          width: 640,
-          height: 480,
-          lang: "en"
-        });
-        
-        // Set up callbacks
-        vto.on('onOpenStream', (data) => {
-          if (data.success) {
-            updateStatus('VTO simulation active - Move your face to see the glasses adjust');
-            stopBtn.disabled = false;
-            warningMessage.textContent = "Simulation active - The glasses will follow simulated face movement";
+      
+      function setupCallbacks() {
+        // Callbacks
+        vto.onIssue = (data) => {
+          console.warn("VTO Issue:", data);
+          
+          // Check for specific issues
+          if (data.cameraAccessDenied) {
+            updateStatus('Camera access denied. Please allow camera access to use VTO.', 'error');
+          } else if (data.noCameraFound) {
+            updateStatus('No camera found. Please check your camera connection.', 'error');
+          } else if (data.frameNotFound) {
+            updateStatus('Frame not found. Trying another frame...', 'error');
           }
-        });
+        };
         
-        vto.on('onSnapshot', (data) => {
-          const img = document.createElement('img');
-          img.src = data.dataUrl;
+        vto.onSnapshot = (result) => {
+          console.log("Snapshot result:", result);
+          const img = document.createElement("img");
+          img.src = result.dataUrl;
           img.width = 300;
-          document.getElementById('snapshotResult').innerHTML = '';
-          document.getElementById('snapshotResult').appendChild(img);
+          document.getElementById("snapshotResult").innerHTML = "";
+          document.getElementById("snapshotResult").appendChild(img);
+          
+          // Show success message
           updateStatus('Snapshot captured successfully!', 'success');
-        });
+          setTimeout(() => {
+            if (isVtoReady) updateStatus('VTO is running');
+          }, 3000);
+        };
         
-        vto.on('onStopVto', () => {
-          updateStatus('VTO simulation stopped');
-          startBtn.disabled = false;
-          stopBtn.disabled = true;
-          warningMessage.textContent = "Note: This is a simulation. The actual FittingBox SDK is currently unavailable.";
-        });
+        vto.onPhotoRender = (res) => {
+          console.log("Photo render:", res);
+        };
         
-        vto.on('onLiveStatus', (status) => {
-          console.log('Live status:', status);
-        });
+        vto.onLiveStatus = (status) => {
+          console.log("Live status:", status);
+        };
         
-        vto.on('onMode', (mode) => {
-          console.log('Mode changed to:', mode);
-        });
+        vto.onMode = (mode) => {
+          console.log("Mode changed to:", mode);
+          updateStatus(`Mode: ${mode}`);
+        };
         
-        // Set up button event listeners
-        startBtn.addEventListener('click', () => {
-          vto.startVto('live');
-          startBtn.disabled = true;
-          updateStatus('Starting VTO simulation...');
-        });
+        vto.onOpenStream = (value) => {
+          if (value.success) {
+            console.log("VTO initialized successfully");
+            enableButtons();
+            isVtoReady = true;
+            updateStatus('VTO is ready. Click "Start Live" to begin.');
+          }
+        };
         
-        stopBtn.addEventListener('click', () => {
-          vto.stopVto();
-          updateStatus('Stopping VTO simulation...');
-        });
+        vto.onPrivacyTermsShown = () => {
+          updateStatus('Please accept the privacy terms to continue...');
+        };
         
-        snapshotBtn.addEventListener('click', () => {
-          vto.getSnapshot();
-          updateStatus('Capturing snapshot...');
-        });
-        
-        // Frame switch buttons
-        frame1Btn.addEventListener('click', () => {
-          vto.setFrame("8053672909258");
-          updateStatus('Loading frame 1...');
-        });
-        
-        frame2Btn.addEventListener('click', () => {
-          vto.setFrame("0888392486523");
-          updateStatus('Loading frame 2...');
-        });
-        
-        frame3Btn.addEventListener('click', () => {
-          vto.setFrame("8056597233958");
-          updateStatus('Loading frame 3...');
-        });
-        
-        // Try to access camera (for a more realistic simulation)
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(stream) {
-              const video = document.getElementById('cameraFeed');
-              video.srcObject = stream;
-            })
-            .catch(function(error) {
-              console.log('Camera access error:', error);
-              // Show placeholder if camera access is denied
-              updateStatus('Camera not available - Using simulation only', 'warning');
-              warningMessage.textContent = "Camera access denied. Using simulated face tracking only.";
-            });
+        vto.onAgreePrivacyTerms = () => {
+          updateStatus('Privacy terms accepted. Initializing...');
+        };
+      }
+      
+      function enableButtons() {
+        document.getElementById("startLive").disabled = false;
+        document.getElementById("stopLive").disabled = false;
+        document.getElementById("snapshot").disabled = false;
+        document.getElementById("frame1").disabled = false;
+        document.getElementById("frame2").disabled = false;
+        document.getElementById("frame3").disabled = false;
+      }
+      
+      // Start initialization when window loads
+      window.addEventListener('load', function() {
+        initVTO();
+      });
+      
+      // Set up button event listeners
+      document.getElementById("startLive").addEventListener('click', () => {
+        if (isVtoReady) {
+          try {
+            vto.startVto("live");
+            updateStatus('Starting camera...');
+          } catch (error) {
+            console.error('Error starting VTO:', error);
+            updateStatus('Error starting VTO. Please try again.', 'error');
+          }
+        }
+      });
+      
+      document.getElementById("stopLive").addEventListener('click', () => {
+        if (isVtoReady) {
+          try {
+            vto.stopVto();
+            updateStatus('VTO stopped. Click "Start Live" to begin again.');
+          } catch (error) {
+            console.error('Error stopping VTO:', error);
+          }
+        }
+      });
+      
+      document.getElementById("snapshot").addEventListener('click', () => {
+        if (isVtoReady) {
+          try {
+            vto.getSnapshot();
+            updateStatus('Capturing snapshot...');
+          } catch (error) {
+            console.error('Error taking snapshot:', error);
+            updateStatus('Error taking snapshot. Please try again.', 'error');
+          }
+        }
+      });
+      
+      // Frame switch buttons
+      document.getElementById("frame1").addEventListener('click', () => {
+        if (isVtoReady) {
+          try {
+            vto.setFrame("8053672909258");
+            updateStatus('Loading frame 1...');
+          } catch (error) {
+            console.error('Error setting frame:', error);
+          }
+        }
+      });
+      
+      document.getElementById("frame2").addEventListener('click', () => {
+        if (isVtoReady) {
+          try {
+            vto.setFrame("0888392486523");
+            updateStatus('Loading frame 2...');
+          } catch (error) {
+            console.error('Error setting frame:', error);
+          }
+        }
+      });
+      
+      document.getElementById("frame3").addEventListener('click', () => {
+        if (isVtoReady) {
+          try {
+            vto.setFrame("8056597233958");
+            updateStatus('Loading frame 3...');
+          } catch (error) {
+            console.error('Error setting frame:', error);
+          }
         }
       });
     </script>
