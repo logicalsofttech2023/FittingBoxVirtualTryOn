@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import "./App.css";
 
 function App() {
@@ -9,42 +9,71 @@ function App() {
   const [isVtoActive, setIsVtoActive] = useState(false);
   const [uiStatus, setUiStatus] = useState("");
 
+  // Use useCallback to memoize functions that are used in effects
+  const hide = useCallback(() => {
+    if (fitmixRef.current) {
+      fitmixRef.current.style.display = "none";
+      setIsVtoActive(false);
+    }
+  }, []);
+
+  const show = useCallback(() => {
+    if (fitmixRef.current) {
+      fitmixRef.current.style.display = "block";
+    }
+  }, []);
+
   useEffect(() => {
+    // Create a stable reference to the hide function
+    const handleStopVto = () => {
+      hide();
+      console.log("VTO stopped");
+    };
+
+    const handleUiStatus = (status) => {
+      console.log("UI Status:", status);
+      setUiStatus(status);
+      if (status === "ready") {
+        setIsLoading(false);
+        console.log("VTO module is ready.");
+      }
+    };
+
+    const handleMode = (mode) => {
+      console.log("Mode changed to:", mode);
+      setVtoMode(mode);
+    };
+
+    const handleLiveStatus = (status) => {
+      console.log("Live status:", status);
+      setIsVtoActive(status === "started");
+    };
+
+    const handleSnapshot = (photoData) => {
+      console.log("Photo taken:", photoData);
+      // You could download or display the photo here
+    };
+
+    const handleRenderResult = (result) => {
+      console.log("Render result:", result);
+    };
+
+    const handleIssue = (data) => {
+      console.log("Issue:", data);
+    };
+
     const params = {
       apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
       frame: currentFrame,
       
       // Only use supported callback methods
-      onStopVto: () => {
-        hide();
-        console.log("VTO stopped");
-      },
-      onIssue: (data) => {
-        console.log("Issue:", data);
-      },
-      onUiStatus: (status) => {
-        console.log("UI Status:", status);
-        setUiStatus(status);
-        if (status === "ready") {
-          setIsLoading(false);
-          console.log("VTO module is ready.");
-        }
-      },
-      onMode: (mode) => {
-        console.log("Mode changed to:", mode);
-        setVtoMode(mode);
-      },
-      onLiveStatus: (status) => {
-        console.log("Live status:", status);
-        setIsVtoActive(status === "started");
-      },
-      onSnapshot: (photoData) => {
-        console.log("Photo taken:", photoData);
-        // You could download or display the photo here
-      },
-      onRenderResult: (result) => {
-        console.log("Render result:", result);
-      },
+      onStopVto: handleStopVto,
+      onIssue: handleIssue,
+      onUiStatus: handleUiStatus,
+      onMode: handleMode,
+      onLiveStatus: handleLiveStatus,
+      onSnapshot: handleSnapshot,
+      onRenderResult: handleRenderResult,
       
       // Configuration options
       language: "en",
@@ -68,43 +97,37 @@ function App() {
         window.fitmixInstance.stopVto();
       }
     };
-  }, []);
-
-  const hide = () => {
-    if (fitmixRef.current) {
-      fitmixRef.current.style.display = "none";
-      setIsVtoActive(false);
-    }
-  };
-
-  const show = () => {
-    if (fitmixRef.current) {
-      fitmixRef.current.style.display = "block";
-    }
-  };
+  }, [currentFrame, hide]); // Add dependencies
 
   const openVto = (mode = "live") => {
-    window.fitmixInstance.startVto(mode);
-    show();
+    if (window.fitmixInstance) {
+      window.fitmixInstance.startVto(mode);
+      show();
+    }
   };
 
   const stopVto = () => {
-    window.fitmixInstance.stopVto();
-    hide();
+    if (window.fitmixInstance) {
+      window.fitmixInstance.stopVto();
+      hide();
+    }
   };
 
   const changeFrame = (frameId) => {
-    window.fitmixInstance.setFrame(frameId);
-    setCurrentFrame(frameId);
+    if (window.fitmixInstance) {
+      window.fitmixInstance.setFrame(frameId);
+      setCurrentFrame(frameId);
+    }
   };
 
   const takePhoto = () => {
-    window.fitmixInstance.takePhoto();
+    if (window.fitmixInstance && window.fitmixInstance.takePhoto) {
+      window.fitmixInstance.takePhoto();
+    }
   };
 
   const changeModel = (modelId) => {
-    // Note: This method might not be available in all API versions
-    if (window.fitmixInstance.setModel) {
+    if (window.fitmixInstance && window.fitmixInstance.setModel) {
       window.fitmixInstance.setModel(modelId);
     } else {
       console.warn("setModel method not available in this API version");
@@ -112,7 +135,7 @@ function App() {
   };
 
   const resetView = () => {
-    if (window.fitmixInstance.resetView) {
+    if (window.fitmixInstance && window.fitmixInstance.resetView) {
       window.fitmixInstance.resetView();
     } else {
       console.warn("resetView method not available in this API version");
@@ -120,7 +143,7 @@ function App() {
   };
 
   const toggleDebug = () => {
-    if (window.fitmixInstance.setConfig) {
+    if (window.fitmixInstance && window.fitmixInstance.setConfig) {
       const currentDebug = window.fitmixInstance.getConfig?.().debug || false;
       window.fitmixInstance.setConfig({ debug: !currentDebug });
     } else {
@@ -129,7 +152,7 @@ function App() {
   };
 
   const getSuggestions = () => {
-    if (window.fitmixInstance.getSuggestions) {
+    if (window.fitmixInstance && window.fitmixInstance.getSuggestions) {
       window.fitmixInstance.getSuggestions()
         .then(suggestions => {
           console.log("Frame suggestions:", suggestions);
@@ -143,7 +166,7 @@ function App() {
   };
 
   const getFaceShape = () => {
-    if (window.fitmixInstance.getFaceshape) {
+    if (window.fitmixInstance && window.fitmixInstance.getFaceshape) {
       window.fitmixInstance.getFaceshape()
         .then(faceShape => {
           console.log("Face shape:", faceShape);
@@ -218,12 +241,8 @@ function App() {
           <button onClick={toggleDebug}>
             Toggle Debug
           </button>
-        </div>
-
-        <h2>Model Selection</h2>
-        <div className="model-buttons">
-          <button onClick={() => changeModel("default")}>
-            Default Model
+          <button onClick={stopVto} disabled={!isVtoActive}>
+            Stop VTO
           </button>
         </div>
       </div>
