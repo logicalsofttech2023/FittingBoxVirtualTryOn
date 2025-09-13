@@ -34,13 +34,19 @@
         background: #ccc;
         cursor: not-allowed;
       }
+      .loading {
+        color: #666;
+        font-style: italic;
+      }
     </style>
   </head>
   <body>
     <h2>👓 FittingBox Virtual Try-On Demo</h2>
 
     <!-- Container where VTO will be mounted -->
-    <div id="vtoContainer"></div>
+    <div id="vtoContainer">
+      <p class="loading">Loading VTO, please wait...</p>
+    </div>
 
     <!-- Controls -->
     <div id="controls">
@@ -56,21 +62,24 @@
     <div id="snapshotResult"></div>
 
     <!-- Load the FittingBox VTO script -->
-    <script
-      src="https://vto-advanced-integration-api.fittingbox.com/index.js"
-      type="text/javascript"
-    ></script>
+    <script src="https://vto-advanced-sdk.fittingbox.com/vto-advanced.js"></script>
 
     <script>
       let vto;
       let isVtoReady = false;
 
       function initVTO() {
+        // Check if VTOAdvanced is available
+        if (typeof VTOAdvanced === 'undefined') {
+          console.error('VTOAdvanced is not defined. Script may not have loaded properly.');
+          return;
+        }
+
         const container = document.getElementById("vtoContainer");
 
         try {
           // Initialize the VTO instance
-          vto = new FittingBoxVTO({
+          vto = new VTOAdvanced({
             apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
             frame: "8053672909258",
             width: container.clientWidth,
@@ -109,14 +118,18 @@
           vto.onMode = (mode) => {
             console.log("🔄 Mode changed to:", mode);
           };
-
+          
           vto.onOpenStream = (value) => {
             if (value.success) {
               console.log("✅ VTO initialized successfully");
               enableButtons();
               isVtoReady = true;
+              // Remove loading message
+              const loadingMsg = document.querySelector('#vtoContainer .loading');
+              if (loadingMsg) loadingMsg.remove();
             }
           };
+          
         } catch (error) {
           console.error("❌ Error initializing VTO:", error);
         }
@@ -132,22 +145,29 @@
       }
 
       // Wait for the VTO script to load before initializing
-      if (typeof VTOAdvanced !== "undefined") {
-        initVTO();
-      } else {
-        // If script hasn't loaded yet, wait for it
-        window.addEventListener("load", initVTO);
+      function checkVTOLoaded() {
+        if (typeof VTOAdvanced !== 'undefined') {
+          initVTO();
+        } else {
+          // Check again after a short delay
+          setTimeout(checkVTOLoaded, 100);
+        }
       }
+
+      // Start checking if VTO script is loaded
+      window.addEventListener('load', function() {
+        checkVTOLoaded();
+      });
 
       // Controls with safety checks
       document.getElementById("startLive").onclick = () => {
         if (isVtoReady) vto.startVto("live");
       };
-
+      
       document.getElementById("stopLive").onclick = () => {
         if (isVtoReady) vto.stopVto();
       };
-
+      
       document.getElementById("snapshot").onclick = () => {
         if (isVtoReady) vto.getSnapshot();
       };
@@ -156,11 +176,11 @@
       document.getElementById("frame1").onclick = () => {
         if (isVtoReady) vto.setFrame("8053672909258");
       };
-
+      
       document.getElementById("frame2").onclick = () => {
         if (isVtoReady) vto.setFrame("0888392486523");
       };
-
+      
       document.getElementById("frame3").onclick = () => {
         if (isVtoReady) vto.setFrame("8056597233958");
       };
