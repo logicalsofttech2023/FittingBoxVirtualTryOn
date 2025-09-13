@@ -7,43 +7,54 @@ function App() {
   const [currentFrame, setCurrentFrame] = useState("8053672909258");
   const [vtoMode, setVtoMode] = useState("live");
   const [isVtoActive, setIsVtoActive] = useState(false);
+  const [uiStatus, setUiStatus] = useState("");
 
   useEffect(() => {
     const params = {
       apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
       frame: currentFrame,
-      onStopVto: hide,
+      
+      // Only use supported callback methods
+      onStopVto: () => {
+        hide();
+        console.log("VTO stopped");
+      },
       onIssue: (data) => {
         console.log("Issue:", data);
       },
-      // Additional parameters from API documentation
-      onReady: () => {
-        console.log("VTO module is ready.");
-        setIsLoading(false);
+      onUiStatus: (status) => {
+        console.log("UI Status:", status);
+        setUiStatus(status);
+        if (status === "ready") {
+          setIsLoading(false);
+          console.log("VTO module is ready.");
+        }
       },
-      onStartVto: () => {
-        console.log("VTO started");
-        setIsVtoActive(true);
+      onMode: (mode) => {
+        console.log("Mode changed to:", mode);
+        setVtoMode(mode);
       },
-      onFrameChanged: (frameId) => {
-        console.log("Frame changed to:", frameId);
-        setCurrentFrame(frameId);
+      onLiveStatus: (status) => {
+        console.log("Live status:", status);
+        setIsVtoActive(status === "started");
       },
-      onModelChanged: (modelId) => {
-        console.log("Model changed to:", modelId);
-      },
-      onPhotoTaken: (photoData) => {
+      onSnapshot: (photoData) => {
         console.log("Photo taken:", photoData);
         // You could download or display the photo here
       },
-      language: "en", // Set language (en, fr, etc.)
-      showCloseButton: true, // Show close button in the widget
-      enablePhotoCapture: true, // Enable photo capture feature
-      enableFrameSuggestions: true, // Enable frame suggestions
-      enableTrying: true, // Enable trying mode
-      enableVto: true, // Enable VTO mode
-      enableHeadDetection: true, // Enable head detection
-      debug: false, // Enable debug mode
+      onRenderResult: (result) => {
+        console.log("Render result:", result);
+      },
+      
+      // Configuration options
+      language: "en",
+      showCloseButton: true,
+      enablePhotoCapture: true,
+      enableFrameSuggestions: true,
+      enableTrying: true,
+      enableVto: true,
+      enableHeadDetection: true,
+      debug: false,
     };
 
     window.fitmixInstance = window.FitMix.createWidget(
@@ -73,7 +84,6 @@ function App() {
   };
 
   const openVto = (mode = "live") => {
-    setVtoMode(mode);
     window.fitmixInstance.startVto(mode);
     show();
   };
@@ -93,27 +103,58 @@ function App() {
   };
 
   const changeModel = (modelId) => {
-    window.fitmixInstance.setModel(modelId);
+    // Note: This method might not be available in all API versions
+    if (window.fitmixInstance.setModel) {
+      window.fitmixInstance.setModel(modelId);
+    } else {
+      console.warn("setModel method not available in this API version");
+    }
   };
 
   const resetView = () => {
-    window.fitmixInstance.resetView();
+    if (window.fitmixInstance.resetView) {
+      window.fitmixInstance.resetView();
+    } else {
+      console.warn("resetView method not available in this API version");
+    }
   };
 
   const toggleDebug = () => {
-    const currentDebug = window.fitmixInstance.getConfig().debug;
-    window.fitmixInstance.setConfig({ debug: !currentDebug });
+    if (window.fitmixInstance.setConfig) {
+      const currentDebug = window.fitmixInstance.getConfig?.().debug || false;
+      window.fitmixInstance.setConfig({ debug: !currentDebug });
+    } else {
+      console.warn("setConfig method not available in this API version");
+    }
   };
 
   const getSuggestions = () => {
-    window.fitmixInstance.getSuggestions()
-      .then(suggestions => {
-        console.log("Frame suggestions:", suggestions);
-        // You could display these suggestions in your UI
-      })
-      .catch(error => {
-        console.error("Error getting suggestions:", error);
-      });
+    if (window.fitmixInstance.getSuggestions) {
+      window.fitmixInstance.getSuggestions()
+        .then(suggestions => {
+          console.log("Frame suggestions:", suggestions);
+        })
+        .catch(error => {
+          console.error("Error getting suggestions:", error);
+        });
+    } else {
+      console.warn("getSuggestions method not available in this API version");
+    }
+  };
+
+  const getFaceShape = () => {
+    if (window.fitmixInstance.getFaceshape) {
+      window.fitmixInstance.getFaceshape()
+        .then(faceShape => {
+          console.log("Face shape:", faceShape);
+          alert(`Your face shape is: ${faceShape}`);
+        })
+        .catch(error => {
+          console.error("Error getting face shape:", error);
+        });
+    } else {
+      console.warn("getFaceshape method not available in this API version");
+    }
   };
 
   return (
@@ -121,6 +162,8 @@ function App() {
       <h1>FittingBox VTO Experience</h1>
       
       {isLoading && <div className="loading">Loading VTO...</div>}
+      
+      <div className="status">UI Status: {uiStatus}</div>
       
       <div className="controls">
         <h2>Frame Selection</h2>
@@ -169,6 +212,9 @@ function App() {
           <button onClick={getSuggestions}>
             Get Suggestions
           </button>
+          <button onClick={getFaceShape}>
+            Get Face Shape
+          </button>
           <button onClick={toggleDebug}>
             Toggle Debug
           </button>
@@ -179,7 +225,6 @@ function App() {
           <button onClick={() => changeModel("default")}>
             Default Model
           </button>
-          {/* Add more model IDs as needed */}
         </div>
       </div>
 

@@ -58,6 +58,17 @@ button.active {
   background-color: #f8f9fa;
   border-radius: 4px;
   margin-bottom: 20px;
+  font-weight: bold;
+  color: #4a6fa5;
+}
+
+.status {
+  text-align: center;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-style: italic;
 }
 
 #fitmix-container {
