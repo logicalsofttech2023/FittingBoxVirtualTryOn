@@ -27,7 +27,7 @@
     </style>
     <!-- Load FittingBox FitMix SDK -->
     <script
-      src="https://static.fittingbox.com/api/v1/fitmix.js"
+      src="//vto-advanced-integration-api.fittingbox.com/index.js"
       type="text/javascript"
     ></script>
   </head>
@@ -70,6 +70,11 @@
           params,
           function () {
             console.log("VTO module is ready.");
+            // In order to start automatically the VTO,
+            // start in this "initialization done" callback
+            // Note that we recommend to initialization early in the webpage
+            // and then start when the user clicks on the CTA in your page
+            //openVto()
           }
         );
       };
