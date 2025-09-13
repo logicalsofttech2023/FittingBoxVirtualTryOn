@@ -30,10 +30,13 @@
       #snapshotResult {
         margin-top: 20px;
       }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
     </style>
   </head>
   <body>
-    <!-- <div id="root"></div> -->
     <h2>👓 FittingBox Virtual Try-On Demo</h2>
 
     <!-- Container where VTO will be mounted -->
@@ -41,12 +44,12 @@
 
     <!-- Controls -->
     <div id="controls">
-      <button id="startLive">Start Live</button>
-      <button id="stopLive">Stop</button>
-      <button id="snapshot">Take Snapshot</button>
-      <button id="frame1">Frame 1</button>
-      <button id="frame2">Frame 2</button>
-      <button id="frame3">Frame 3</button>
+      <button id="startLive" disabled>Start Live</button>
+      <button id="stopLive" disabled>Stop</button>
+      <button id="snapshot" disabled>Take Snapshot</button>
+      <button id="frame1" disabled>Frame 1</button>
+      <button id="frame2" disabled>Frame 2</button>
+      <button id="frame3" disabled>Frame 3</button>
     </div>
 
     <!-- Snapshot preview -->
@@ -57,68 +60,108 @@
 
     <script>
       let vto;
+      let isVtoReady = false;
 
-      async function initVTO() {
+      function initVTO() {
         const container = document.getElementById("vtoContainer");
 
-        // Initialize the VTO instance
-        vto = new VTOAdvanced({
-          apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
-          frame: "8053672909258",
-          width: container.clientWidth,
-          height: container.clientHeight,
-          lang: "en",
-          uiConfiguration: {
-            livePhotoButton: true,
-            cameraPermissionScreen: true,
-            photoWelcomeScreen: false,
-            vtoLoadingScreen: true,
-          },
-        });
+        try {
+          // Initialize the VTO instance
+          vto = new VTOAdvanced({
+            apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
+            frame: "8053672909258",
+            width: container.clientWidth,
+            height: container.clientHeight,
+            lang: "en",
+            uiConfiguration: {
+              livePhotoButton: true,
+              cameraPermissionScreen: true,
+              photoWelcomeScreen: false,
+              vtoLoadingScreen: true,
+            },
+          });
 
-        // Callbacks
-        vto.onIssue = (data) => {
-          console.warn("⚠️ Issue:", data);
-        };
+          // Callbacks
+          vto.onIssue = (data) => {
+            console.warn("⚠️ Issue:", data);
+          };
 
-        vto.onSnapshot = (result) => {
-          console.log("📸 Snapshot result:", result);
-          const img = document.createElement("img");
-          img.src = result.dataUrl;
-          img.width = 300;
-          document.getElementById("snapshotResult").innerHTML = "";
-          document.getElementById("snapshotResult").appendChild(img);
-        };
+          vto.onSnapshot = (result) => {
+            console.log("📸 Snapshot result:", result);
+            const img = document.createElement("img");
+            img.src = result.dataUrl;
+            img.width = 300;
+            document.getElementById("snapshotResult").innerHTML = "";
+            document.getElementById("snapshotResult").appendChild(img);
+          };
 
-        vto.onPhotoRender = (res) => {
-          console.log("🎨 Photo render:", res);
-        };
+          vto.onPhotoRender = (res) => {
+            console.log("🎨 Photo render:", res);
+          };
 
-        vto.onLiveStatus = (status) => {
-          console.log("📡 Live status:", status);
-        };
+          vto.onLiveStatus = (status) => {
+            console.log("📡 Live status:", status);
+          };
 
-        vto.onMode = (mode) => {
-          console.log("🔄 Mode changed to:", mode);
-        };
+          vto.onMode = (mode) => {
+            console.log("🔄 Mode changed to:", mode);
+          };
+          
+          vto.onOpenStream = (value) => {
+            if (value.success) {
+              console.log("✅ VTO initialized successfully");
+              enableButtons();
+              isVtoReady = true;
+            }
+          };
+          
+        } catch (error) {
+          console.error("❌ Error initializing VTO:", error);
+        }
       }
 
-      // Initialize
-      initVTO();
+      function enableButtons() {
+        document.getElementById("startLive").disabled = false;
+        document.getElementById("stopLive").disabled = false;
+        document.getElementById("snapshot").disabled = false;
+        document.getElementById("frame1").disabled = false;
+        document.getElementById("frame2").disabled = false;
+        document.getElementById("frame3").disabled = false;
+      }
 
-      // Controls
-      document.getElementById("startLive").onclick = () => vto.startVto("live");
-      document.getElementById("stopLive").onclick = () => vto.stopVto();
-      document.getElementById("snapshot").onclick = () => vto.getSnapshot();
+      // Wait for the VTO script to load before initializing
+      if (typeof VTOAdvanced !== 'undefined') {
+        initVTO();
+      } else {
+        // If script hasn't loaded yet, wait for it
+        window.addEventListener('load', initVTO);
+      }
+
+      // Controls with safety checks
+      document.getElementById("startLive").onclick = () => {
+        if (isVtoReady) vto.startVto("live");
+      };
+      
+      document.getElementById("stopLive").onclick = () => {
+        if (isVtoReady) vto.stopVto();
+      };
+      
+      document.getElementById("snapshot").onclick = () => {
+        if (isVtoReady) vto.getSnapshot();
+      };
 
       // Frame switch buttons
-      document.getElementById("frame1").onclick = () =>
-        vto.setFrame("8053672909258");
-      document.getElementById("frame2").onclick = () =>
-        vto.setFrame("0888392486523");
-      document.getElementById("frame3").onclick = () =>
-        vto.setFrame("8056597233958");
+      document.getElementById("frame1").onclick = () => {
+        if (isVtoReady) vto.setFrame("8053672909258");
+      };
+      
+      document.getElementById("frame2").onclick = () => {
+        if (isVtoReady) vto.setFrame("0888392486523");
+      };
+      
+      document.getElementById("frame3").onclick = () => {
+        if (isVtoReady) vto.setFrame("8056597233958");
+      };
     </script>
-    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
