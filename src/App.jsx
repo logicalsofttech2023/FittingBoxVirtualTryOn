@@ -1,35 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useRef } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const fitmixRef = useRef(null);
+
+  useEffect(() => {
+    const params = {
+      apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
+      frame: "8053672909258",
+      onStopVto: hide,
+      onIssue: (data) => {
+        console.log("Issue:", data);
+      },
+    };
+
+    window.fitmixInstance = window.FitMix.createWidget(
+      "fitmix-container",
+      params,
+      function () {
+        console.log("VTO module is ready.");
+      }
+    );
+
+    return () => {
+      // cleanup when component unmount
+      if (window.fitmixInstance) {
+        window.fitmixInstance.stopVto();
+      }
+    };
+  }, []);
+
+  const hide = () => {
+    if (fitmixRef.current) {
+      fitmixRef.current.style.display = "none";
+    }
+  };
+
+  const show = () => {
+    if (fitmixRef.current) {
+      fitmixRef.current.style.display = "block";
+    }
+  };
+
+  const openVto = () => {
+    window.fitmixInstance.startVto("live");
+    show();
+  };
+
+  const stopVto = () => {
+    window.fitmixInstance.stopVto();
+    hide();
+  };
 
   return (
-    <>
+    <div className="wrapper">
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={() => window.fitmixInstance.setFrame("8053672909258")}>
+          Sample frame 1
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <button onClick={() => window.fitmixInstance.setFrame("0888392486523")}>
+          Sample frame 2
+        </button>
+        <button onClick={() => window.fitmixInstance.setFrame("8056597233958")}>
+          Sample frame 3
+        </button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+      <button onClick={openVto}>Start VTO</button>
+      <button onClick={stopVto}>Stop VTO</button>
+
+      <div
+        id="fitmix-container"
+        ref={fitmixRef}
+        style={{ width: "min(500px,90vw)", height: "400px", display: "none" }}
+      ></div>
+    </div>
+  );
 }
 
-export default App
+export default App;

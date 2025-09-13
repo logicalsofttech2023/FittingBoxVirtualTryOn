@@ -4,27 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FittingBox VTO Advanced Demo</title>
-    <style>
-      html,
-      body {
-        margin: 0;
-      }
-
-      .wrapper {
-        --padding: 0.5rem;
-        height: calc(100vh - var(--padding) * 2);
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: var(--padding);
-      }
-
-      #fitmix-container {
-        width: min(500px, 90vw);
-        flex: 1;
-        display: none;
-      }
-    </style>
     <!-- Load FittingBox FitMix SDK -->
     <script
       src="//vto-advanced-integration-api.fittingbox.com/index.js"
@@ -32,71 +11,9 @@
     ></script>
   </head>
   <body>
-    <div class="wrapper">
-      <div>
-        <button onclick="fitmixInstance.setFrame('8053672909258')">
-          Sample frame 1
-        </button>
-        <button onclick="fitmixInstance.setFrame('0888392486523')">
-          Sample frame 2
-        </button>
-        <button onclick="fitmixInstance.setFrame('8056597233958')">
-          Sample frame 3
-        </button>
-      </div>
+    <div id="root"></div>
 
-      <button onclick="openVto()">
-        User action to start the VTO experience
-      </button>
-      <button onclick="stopVto()">
-        User action to stop the VTO experience
-      </button>
-
-      <div id="fitmix-container"></div>
-    </div>
-    <script>
-      var params = {
-        apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
-        frame: "8053672909258",
-        onStopVto: hide,
-        onIssue: (data) => {
-          console.log(data);
-        },
-      };
-
-      window.onload = function () {
-        window.fitmixInstance = FitMix.createWidget(
-          "fitmix-container",
-          params,
-          function () {
-            console.log("VTO module is ready.");
-            // In order to start automatically the VTO,
-            // start in this "initialization done" callback
-            // Note that we recommend to initialization early in the webpage
-            // and then start when the user clicks on the CTA in your page
-            //openVto()
-          }
-        );
-      };
-
-      const fitmix = document.getElementById("fitmix-container");
-
-      function hide() {
-        fitmix.style.display = "none";
-      }
-
-      function show() {
-        fitmix.style.display = "block";
-      }
-
-      function openVto() {
-        fitmixInstance.startVto("live");
-        show();
-      }
-
-      function stopVto() {
-        fitmixInstance.stopVto();
-      }
-    </script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
