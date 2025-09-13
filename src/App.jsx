@@ -7,60 +7,34 @@ function App() {
   const apiKey = "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn";
 
   useEffect(() => {
-    const params = {
-      apiKey,
-      frame: "8053672909258",
-      lang: "en",
-      width: 500,
-      height: 400,
-      uiConfiguration: {
-        apiKeyIssueMessage: true,
-        frameIssueMessage: true,
-        liveCameraAccessDenied: true,
-        liveDetectionFailure: true,
-        liveLensesAnimations: true,
-        livePhotoButton: true,
-        liveRelaunchDetectionButton: true,
-        loadingIndicator: true,
-        networkIssueMessage: true,
-        photoLiveButton: true,
-        photoRenderError: true,
-        photoWelcomeScreen: true,
-        positioningGuideOverlay: true,
-        cameraPermissionScreen: true,
-        vtoLoadingScreen: true,
-        hideEverything: false,
-      },
-      onAgreePrivacyTerms: () => console.log("User agreed privacy terms"),
-      onDisagreePrivacyTerms: () => console.log("User disagreed privacy terms"),
-      onPrivacyTermsShown: () => console.log("Privacy terms shown"),
-      onStopVto: () => console.log("VTO stopped"),
-      onMode: (mode) => console.log("Mode changed:", mode),
-      onIssue: (data) => console.log("Issue:", data),
-      onUiStatus: (data) => console.log("UI Status:", data),
-      onLiveStatus: (data) => console.log("Live Status:", data),
-      onOpenStream: (data) => console.log("Camera Stream:", data),
-      onPhotoRender: (result) => console.log("Photo Render:", result),
-      onSnapshot: (data) => {
-        console.log("Snapshot:", data);
-        setSnapshot(data.dataUrl);
-      },
-    };
-
-    window.fitmixInstance = window.FitMix.createWidget(
-      "fitmix-container",
-      params,
-      function () {
-        console.log("VTO module ready ✅");
+  const params = {
+    apiKey: apiKey,
+    frame: "8053672909258",
+    onStopVto: () => console.log("Stopped"),
+    onIssue: (data) => {
+      console.log("Issue:", data);
+      if (data.cameraAccessDenied) {
+        alert("Camera access denied! Please allow in browser settings.");
       }
-    );
+    },
+    onOpenStream: (result) => {
+      console.log("Camera opened:", result);
+    },
+  };
 
-    return () => {
-      if (window.fitmixInstance) {
-        window.fitmixInstance.stopVto();
-      }
-    };
-  }, []);
+  window.fitmixInstance = window.FitMix.createWidget(
+    "fitmix-container",
+    params,
+    () => console.log("VTO ready ✅")
+  );
+
+  return () => {
+    if (window.fitmixInstance) {
+      window.fitmixInstance.stopVto();
+    }
+  };
+}, []);
+
 
   // ===== Methods wrappers =====
   const startLive = () => window.fitmixInstance.startVto("live");
