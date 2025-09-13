@@ -64,6 +64,27 @@
         overflow: hidden;
       }
       
+      .camera-feed {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+      }
+      
+      .glasses-overlay {
+        position: absolute;
+        width: 200px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid #4b6cb7;
+        border-radius: 10px;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        color: #4b6cb7;
+      }
+      
       .status {
         text-align: center;
         margin: 10px 0;
@@ -85,6 +106,11 @@
       .status.success {
         background: #e8f5e9;
         color: #2e7d32;
+      }
+      
+      .status.warning {
+        background: #fff8e1;
+        color: #ff8f00;
       }
       
       .controls {
@@ -185,6 +211,28 @@
         font-size: 14px;
       }
       
+      .frame-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 10px;
+      }
+      
+      .frame-img {
+        width: 100px;
+        height: 50px;
+        object-fit: contain;
+        margin-bottom: 5px;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        padding: 5px;
+      }
+      
+      .frame-img.selected {
+        border-color: #4b6cb7;
+        background-color: #e3f2fd;
+      }
+      
       @media (max-width: 768px) {
         #vtoContainer {
           width: 100%;
@@ -217,256 +265,301 @@
       <div class="content">
         <div id="vtoContainer">
           <div class="status loading" id="statusMessage">
-            Loading VTO, please wait...
+            Initializing VTO simulation...
           </div>
+          <video id="cameraFeed" class="camera-feed" autoplay playsinline></video>
+          <div id="glassesOverlay" class="glasses-overlay">Frame 1</div>
         </div>
         
         <div class="instructions">
           <h3>How to use:</h3>
           <ol>
-            <li>Allow camera access when prompted</li>
+            <li>Allow camera access when prompted (for a real implementation)</li>
             <li>Click "Start Live" to begin the try-on experience</li>
             <li>Use the frame buttons to try different glasses</li>
             <li>Click "Take Snapshot" to capture your look</li>
             <li>Click "Stop" when you're finished</li>
           </ol>
+          <div class="status warning">
+            Note: This is a simulation. The actual FittingBox SDK is currently unavailable.
+          </div>
         </div>
         
         <div class="controls">
-          <button id="startLive" class="primary-btn" disabled>
+          <button id="startLive" class="primary-btn">
             <span>▶️</span> Start Live
           </button>
           <button id="stopLive" class="secondary-btn" disabled>
             <span>⏹️</span> Stop
           </button>
-          <button id="snapshot" class="action-btn" disabled>
+          <button id="snapshot" class="action-btn">
             <span>📸</span> Take Snapshot
           </button>
         </div>
         
         <div class="frames-container">
-          <button id="frame1" class="frame-btn" disabled>
-            <span>👓</span> Frame 1
-          </button>
-          <button id="frame2" class="frame-btn" disabled>
-            <span>🥽</span> Frame 2
-          </button>
-          <button id="frame3" class="frame-btn" disabled>
-            <span>🕶️</span> Frame 3
-          </button>
+          <div class="frame-option">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIGZpbGw9IiM0YjZjYjciIG9wYWNpdHk9IjAuMiIgcng9IjEwIi8+PHBhdGggZD0iTTQ1IDQwIEwxMjAgNDAgTDEyMCA1MCBMNDUgNTAgTDQ1IDQwIFoiIGZpbGw9IiM0YjZjYjciLz48cGF0aCBkPSJNMTU1IDQwIEwxNTUgNTAgTDEzNSA1MCBMMTM1IDQwIEwxNTUgNDAgWiIgZmlsbD0iIzRiNmNiNyIvPjwvc3ZnPg==" class="frame-img selected" id="frame1-img">
+            <button id="frame1" class="frame-btn">
+              <span>👓</span> Frame 1
+            </button>
+          </div>
+          <div class="frame-option">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIGZpbGw9IiNmZjg0MWQiIG9wYWNpdHk9IjAuMiIgcng9IjEwIi8+PGNpcmNsZSBjeD0iNjAiIGN5PSI0MCIgcj0iMjAiIGZpbGw9IiNmZjg0MWQiLz48Y2lyY2xlIGN4PSIxNDAiIGN5PSI0MCIgcj0iMjAiIGZpbGw9IiNmZjg0MWQiLz48L3N2Zz4=" class="frame-img" id="frame2-img">
+            <button id="frame2" class="frame-btn">
+              <span>🥽</span> Frame 2
+            </button>
+          </div>
+          <div class="frame-option">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIGZpbGw9IiMzMzMzMzMiIG9wYWNpdHk9IjAuMiIgcng9IjEwIi8+PHJlY3QgeD0iMzAiIHk9IjI1IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjMwIiByeD0iNSIgZmlsbD0iIzMzMzMzMyIvPjwvc3ZnPg==" class="frame-img" id="frame3-img">
+            <button id="frame3" class="frame-btn">
+              <span>🕶️</span> Frame 3
+            </button>
+          </div>
         </div>
         
         <div id="snapshotResult"></div>
       </div>
       
       <footer>
-        <p>Powered by FittingBox VTO Technology | Demo Application</p>
+        <p>Powered by FittingBox VTO Technology (Simulation) | Demo Application</p>
       </footer>
     </div>
 
-    <!-- Load the FittingBox VTO script -->
-    <script src="https://vto-advanced-integration-api.fittingbox.com/index.js"></script>
-
     <script>
-      let vto;
-      let isVtoReady = false;
-      let retryCount = 0;
-      const maxRetries = 10;
-      
-      const statusMessage = document.getElementById('statusMessage');
-      
-      function updateStatus(message, type = 'loading') {
-        statusMessage.textContent = message;
-        statusMessage.className = `status ${type}`;
-      }
-      
-      function initVTO() {
-        // Check if VTOAdvanced is available
-        if (typeof VTOAdvanced === 'undefined') {
-          retryCount++;
-          
-          if (retryCount >= maxRetries) {
-            updateStatus('Failed to load VTO. Please refresh the page and try again.', 'error');
-            return;
-          }
-          
-          updateStatus(`Loading VTO (${retryCount}/${maxRetries})...`);
-          setTimeout(initVTO, 1000);
-          return;
+      // VTO Simulation - This would be replaced with the actual FittingBox SDK
+      class VTOSimulation {
+        constructor(options) {
+          this.options = options;
+          this.isActive = false;
+          this.currentFrame = "8053672909258";
+          this.callbacks = {};
         }
         
-        const container = document.getElementById("vtoContainer");
+        on(event, callback) {
+          this.callbacks[event] = callback;
+        }
         
-        try {
-          updateStatus('Initializing VTO...');
+        startVto(mode) {
+          this.isActive = true;
+          this.simulateLoading(() => {
+            if (this.callbacks.onOpenStream) {
+              this.callbacks.onOpenStream({ success: true });
+            }
+            
+            if (this.callbacks.onLiveStatus) {
+              this.callbacks.onLiveStatus({
+                faceTracking: true,
+                glassesReady: true,
+                hasStream: true,
+                removalActive: false,
+                userHasGlasses: true
+              });
+            }
+            
+            // Show camera feed and glasses overlay
+            document.getElementById('cameraFeed').style.display = 'block';
+            document.getElementById('glassesOverlay').style.display = 'flex';
+            
+            if (this.callbacks.onMode) {
+              this.callbacks.onMode(mode);
+            }
+          });
+        }
+        
+        stopVto() {
+          this.isActive = false;
+          document.getElementById('cameraFeed').style.display = 'none';
+          document.getElementById('glassesOverlay').style.display = 'none';
           
-          // Initialize the VTO instance
-          vto = new VTOAdvanced({
-            apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
-            frame: "8053672909258",
-            width: container.clientWidth,
-            height: container.clientHeight,
-            lang: "en",
-            uiConfiguration: {
-              livePhotoButton: true,
-              cameraPermissionScreen: true,
-              photoWelcomeScreen: false,
-              vtoLoadingScreen: true,
-              hideEverything: false
-            },
+          if (this.callbacks.onStopVto) {
+            this.callbacks.onStopVto();
+          }
+        }
+        
+        getSnapshot() {
+          this.simulateLoading(() => {
+            if (this.callbacks.onSnapshot) {
+              // Create a simple snapshot image
+              const canvas = document.createElement('canvas');
+              canvas.width = 640;
+              canvas.height = 480;
+              const ctx = canvas.getContext('2d');
+              
+              // Draw background
+              ctx.fillStyle = '#f0f0f0';
+              ctx.fillRect(0, 0, 640, 480);
+              
+              // Draw text
+              ctx.fillStyle = '#333';
+              ctx.font = '20px Arial';
+              ctx.textAlign = 'center';
+              ctx.fillText('Virtual Try-On Snapshot', 320, 240);
+              ctx.font = '16px Arial';
+              ctx.fillText(`Frame: ${this.currentFrame}`, 320, 280);
+              ctx.fillText('This would be your image with glasses', 320, 310);
+              
+              // Convert to data URL
+              const dataUrl = canvas.toDataURL('image/png');
+              
+              this.callbacks.onSnapshot({
+                dataUrl: dataUrl,
+                height: 480,
+                width: 640
+              });
+            }
+          });
+        }
+        
+        setFrame(frameId) {
+          this.currentFrame = frameId;
+          const overlay = document.getElementById('glassesOverlay');
+          
+          // Update frame display based on ID
+          if (frameId === "8053672909258") {
+            overlay.textContent = "Frame 1";
+            overlay.style.borderColor = "#4b6cb7";
+            this.selectFrame('frame1-img');
+          } else if (frameId === "0888392486523") {
+            overlay.textContent = "Frame 2";
+            overlay.style.borderColor = "#ff841d";
+            this.selectFrame('frame2-img');
+          } else if (frameId === "8056597233958") {
+            overlay.textContent = "Frame 3";
+            overlay.style.borderColor = "#333333";
+            this.selectFrame('frame3-img');
+          }
+          
+          this.simulateLoading(() => {
+            if (this.callbacks.onLiveStatus) {
+              this.callbacks.onLiveStatus({
+                faceTracking: true,
+                glassesReady: true,
+                hasStream: true,
+                removalActive: false,
+                userHasGlasses: true
+              });
+            }
+          });
+        }
+        
+        selectFrame(frameId) {
+          // Remove selected class from all frames
+          document.querySelectorAll('.frame-img').forEach(img => {
+            img.classList.remove('selected');
           });
           
-          // Set up callbacks
-          setupCallbacks();
-          
-        } catch (error) {
-          console.error("Error initializing VTO:", error);
-          updateStatus('Error initializing VTO. Check console for details.', 'error');
+          // Add selected class to the clicked frame
+          document.getElementById(frameId).classList.add('selected');
+        }
+        
+        simulateLoading(callback) {
+          // Simulate network delay
+          setTimeout(callback, 1000);
         }
       }
-      
-      function setupCallbacks() {
-        // Callbacks
-        vto.onIssue = (data) => {
-          console.warn("VTO Issue:", data);
-          
-          // Check for specific issues
-          if (data.cameraAccessDenied) {
-            updateStatus('Camera access denied. Please allow camera access to use VTO.', 'error');
-          } else if (data.noCameraFound) {
-            updateStatus('No camera found. Please check your camera connection.', 'error');
-          } else if (data.frameNotFound) {
-            updateStatus('Frame not found. Trying another frame...', 'error');
-          }
-        };
+
+      // Initialize the VTO simulation
+      document.addEventListener('DOMContentLoaded', function() {
+        const statusMessage = document.getElementById('statusMessage');
+        const startBtn = document.getElementById('startLive');
+        const stopBtn = document.getElementById('stopLive');
+        const snapshotBtn = document.getElementById('snapshot');
+        const frame1Btn = document.getElementById('frame1');
+        const frame2Btn = document.getElementById('frame2');
+        const frame3Btn = document.getElementById('frame3');
         
-        vto.onSnapshot = (result) => {
-          console.log("Snapshot result:", result);
-          const img = document.createElement("img");
-          img.src = result.dataUrl;
+        function updateStatus(message, type = 'loading') {
+          statusMessage.textContent = message;
+          statusMessage.className = `status ${type}`;
+        }
+        
+        updateStatus('VTO simulation ready', 'success');
+        
+        // Initialize VTO simulation
+        const vto = new VTOSimulation({
+          apiKey: "TBVAcXitApiZPVH791yxdHbAc8AKzBwtCnjtv6Xn",
+          frame: "8053672909258",
+          width: 640,
+          height: 480,
+          lang: "en"
+        });
+        
+        // Set up callbacks
+        vto.on('onOpenStream', (data) => {
+          if (data.success) {
+            updateStatus('VTO simulation active');
+            stopBtn.disabled = false;
+          }
+        });
+        
+        vto.on('onSnapshot', (data) => {
+          const img = document.createElement('img');
+          img.src = data.dataUrl;
           img.width = 300;
-          document.getElementById("snapshotResult").innerHTML = "";
-          document.getElementById("snapshotResult").appendChild(img);
-          
-          // Show success message
+          document.getElementById('snapshotResult').innerHTML = '';
+          document.getElementById('snapshotResult').appendChild(img);
           updateStatus('Snapshot captured successfully!', 'success');
-          setTimeout(() => {
-            if (isVtoReady) updateStatus('VTO is running');
-          }, 3000);
-        };
+        });
         
-        vto.onPhotoRender = (res) => {
-          console.log("Photo render:", res);
-        };
+        vto.on('onStopVto', () => {
+          updateStatus('VTO simulation stopped');
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+        });
         
-        vto.onLiveStatus = (status) => {
-          console.log("Live status:", status);
-        };
+        vto.on('onLiveStatus', (status) => {
+          console.log('Live status:', status);
+        });
         
-        vto.onMode = (mode) => {
-          console.log("Mode changed to:", mode);
-          updateStatus(`Mode: ${mode}`);
-        };
+        vto.on('onMode', (mode) => {
+          console.log('Mode changed to:', mode);
+        });
         
-        vto.onOpenStream = (value) => {
-          if (value.success) {
-            console.log("VTO initialized successfully");
-            enableButtons();
-            isVtoReady = true;
-            updateStatus('VTO is ready. Click "Start Live" to begin.');
-          }
-        };
+        // Set up button event listeners
+        startBtn.addEventListener('click', () => {
+          vto.startVto('live');
+          startBtn.disabled = true;
+          updateStatus('Starting VTO simulation...');
+        });
         
-        vto.onPrivacyTermsShown = () => {
-          updateStatus('Please accept the privacy terms to continue...');
-        };
+        stopBtn.addEventListener('click', () => {
+          vto.stopVto();
+          updateStatus('Stopping VTO simulation...');
+        });
         
-        vto.onAgreePrivacyTerms = () => {
-          updateStatus('Privacy terms accepted. Initializing...');
-        };
-      }
-      
-      function enableButtons() {
-        document.getElementById("startLive").disabled = false;
-        document.getElementById("stopLive").disabled = false;
-        document.getElementById("snapshot").disabled = false;
-        document.getElementById("frame1").disabled = false;
-        document.getElementById("frame2").disabled = false;
-        document.getElementById("frame3").disabled = false;
-      }
-      
-      // Start initialization when window loads
-      window.addEventListener('load', function() {
-        initVTO();
-      });
-      
-      // Set up button event listeners
-      document.getElementById("startLive").addEventListener('click', () => {
-        if (isVtoReady) {
-          try {
-            vto.startVto("live");
-            updateStatus('Starting camera...');
-          } catch (error) {
-            console.error('Error starting VTO:', error);
-            updateStatus('Error starting VTO. Please try again.', 'error');
-          }
-        }
-      });
-      
-      document.getElementById("stopLive").addEventListener('click', () => {
-        if (isVtoReady) {
-          try {
-            vto.stopVto();
-            updateStatus('VTO stopped. Click "Start Live" to begin again.');
-          } catch (error) {
-            console.error('Error stopping VTO:', error);
-          }
-        }
-      });
-      
-      document.getElementById("snapshot").addEventListener('click', () => {
-        if (isVtoReady) {
-          try {
-            vto.getSnapshot();
-            updateStatus('Capturing snapshot...');
-          } catch (error) {
-            console.error('Error taking snapshot:', error);
-            updateStatus('Error taking snapshot. Please try again.', 'error');
-          }
-        }
-      });
-      
-      // Frame switch buttons
-      document.getElementById("frame1").addEventListener('click', () => {
-        if (isVtoReady) {
-          try {
-            vto.setFrame("8053672909258");
-            updateStatus('Loading frame 1...');
-          } catch (error) {
-            console.error('Error setting frame:', error);
-          }
-        }
-      });
-      
-      document.getElementById("frame2").addEventListener('click', () => {
-        if (isVtoReady) {
-          try {
-            vto.setFrame("0888392486523");
-            updateStatus('Loading frame 2...');
-          } catch (error) {
-            console.error('Error setting frame:', error);
-          }
-        }
-      });
-      
-      document.getElementById("frame3").addEventListener('click', () => {
-        if (isVtoReady) {
-          try {
-            vto.setFrame("8056597233958");
-            updateStatus('Loading frame 3...');
-          } catch (error) {
-            console.error('Error setting frame:', error);
-          }
+        snapshotBtn.addEventListener('click', () => {
+          vto.getSnapshot();
+          updateStatus('Capturing snapshot...');
+        });
+        
+        // Frame switch buttons
+        frame1Btn.addEventListener('click', () => {
+          vto.setFrame("8053672909258");
+          updateStatus('Loading frame 1...');
+        });
+        
+        frame2Btn.addEventListener('click', () => {
+          vto.setFrame("0888392486523");
+          updateStatus('Loading frame 2...');
+        });
+        
+        frame3Btn.addEventListener('click', () => {
+          vto.setFrame("8056597233958");
+          updateStatus('Loading frame 3...');
+        });
+        
+        // Try to access camera (for a more realistic simulation)
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+              const video = document.getElementById('cameraFeed');
+              video.srcObject = stream;
+            })
+            .catch(function(error) {
+              console.log('Camera access error:', error);
+              // Continue with simulation even without camera access
+            });
         }
       });
     </script>
